@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adyen Monitor — Leading Indicators</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface-2: #1a1a26;
+  --border: rgba(255,255,255,0.06);
+  --text: #e8e6e1;
+  --text-2: #8a8880;
+  --text-3: #5a5850;
+  --green: #1D9E75;
+  --red: #E24B4A;
+  --amber: #BA7517;
+  --blue: #3266ad;
+  --purple: #7F77DD;
+  --font: 'DM Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.header h1 span { color: var(--blue); }
+.header-meta {
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--text-2);
+  font-family: var(--mono);
+}
+.countdown {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-weight: 500;
+  color: var(--amber);
+  margin-top: 4px;
+}
+
+/* Metric cards */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+.metric-label { font-size: 0.75rem; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; }
+.metric-value { font-size: 1.5rem; font-weight: 700; font-family: var(--mono); margin-top: 4px; }
+.metric-sub { font-size: 0.75rem; color: var(--text-3); margin-top: 2px; font-family: var(--mono); }
+
+/* Sentiment badge */
+.sentiment {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  background: #BA751722;
+  color: #BA7517;
+  border: 1px solid #BA751744;
+}
+
+/* Signal table */
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 2rem 0 1rem;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+th {
+  text-align: left;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-3);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+.sig-dot {
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+  font-size: 0.7rem;
+}
+.sig-bull { color: var(--green); }
+.sig-bear { color: var(--red); }
+.sig-neutral { color: var(--amber); font-size: 0.5rem; }
+.sig-none { color: var(--text-3); }
+.sig-name { font-weight: 500; }
+.sig-value { font-family: var(--mono); font-weight: 500; }
+.sig-detail { color: var(--text-2); font-size: 0.8rem; }
+.pos { color: var(--green); font-family: var(--mono); }
+.neg { color: var(--red); font-family: var(--mono); }
+.comp-name { font-weight: 500; }
+
+/* Sparkline */
+.chart-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  height: 220px;
+  position: relative;
+}
+
+/* Footer */
+.footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-3);
+  display: flex;
+  justify-content: space-between;
+}
+.footer a { color: var(--blue); text-decoration: none; }
+
+/* Key dates */
+.key-dates {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+.key-date {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.key-date-label { font-size: 0.8rem; color: var(--text-2); }
+.key-date-value { font-family: var(--mono); font-size: 0.85rem; font-weight: 500; }
+
+@media (max-width: 600px) {
+  body { padding: 1rem; }
+  .metrics { grid-template-columns: 1fr 1fr; }
+  .header { flex-direction: column; gap: 1rem; }
+  .header-meta { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1><span>ADYEN</span> Investment Monitor</h1>
+    <p style="color: var(--text-2); font-size: 0.85rem; margin-top: 4px;">Leading indicators · Pre-Q1 2026 Business Update</p>
+  </div>
+  <div class="header-meta">
+    <div>Última actualización: 2026-04-10T18:20:20</div>
+    <div class="countdown">Q1 Update: 25 días</div>
+  </div>
+</div>
+
+<!-- Key metrics -->
+<div class="metrics">
+  <div class="metric">
+    <div class="metric-label">Precio Adyen</div>
+    <div class="metric-value">€860.0</div>
+    <div class="metric-sub">Target analistas: €1,426</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">EV/FCF</div>
+    <div class="metric-value">18.3x</div>
+    <div class="metric-sub">FCF yield: 4.06%</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Upside a target</div>
+    <div class="metric-value" style="color: var(--green);">+65.8%</div>
+    <div class="metric-sub">€27.12B mkt cap</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">Sentimiento indicadores</div>
+    <div class="metric-value"><span class="sentiment">NEUTRAL</span></div>
+    <div class="metric-sub">3&#9650; 5&#9679; 2&#9660;</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">EUR/USD</div>
+    <div class="metric-value">1.17</div>
+    <div class="metric-sub">FX impact en reported revenue</div>
+  </div>
+  <div class="metric">
+    <div class="metric-label">PDD (Temu) 30d</div>
+    <div class="metric-value" style="color: var(--red);">-4.1%</div>
+    <div class="metric-sub">Proxy drag APAC</div>
+  </div>
+</div>
+
+<!-- Adyen price chart -->
+<div class="section-title">Adyen — evolución de precio (últimos 60 sesiones)</div>
+<div class="chart-container">
+  <canvas id="sparkline"></canvas>
+</div>
+
+<!-- Key upcoming dates -->
+<div class="section-title">Fechas clave</div>
+<div class="key-dates">
+  <div class="key-date">
+    <span class="key-date-label">PDD Earnings</span>
+    <span class="key-date-value">~May 2026</span>
+  </div>
+  <div class="key-date">
+    <span class="key-date-label">Adyen Q1 Update</span>
+    <span class="key-date-value" style="color: var(--amber);">May 5, 2026</span>
+  </div>
+  <div class="key-date">
+    <span class="key-date-label">Shopify Q1 Earnings</span>
+    <span class="key-date-value">~May 2026</span>
+  </div>
+  <div class="key-date">
+    <span class="key-date-label">Adyen H1 2026 Earnings</span>
+    <span class="key-date-value">Aug 13, 2026</span>
+  </div>
+</div>
+
+<!-- Signals table -->
+<div class="section-title">Indicadores adelantados — scoring</div>
+<table>
+  <thead>
+    <tr>
+      <th style="width:40px;">Señal</th>
+      <th>Indicador</th>
+      <th>Valor</th>
+      <th>Contexto</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+        <tr>
+          <td><span class="sig-dot sig-bull">&#9650;</span></td>
+          <td class="sig-name">Adyen precio vs target €1,426</td>
+          <td class="sig-value">€860.0</td>
+          <td class="sig-detail">Upside: 65.8%</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-neutral">&#9679;</span></td>
+          <td class="sig-name">PDD (Temu) — 30d return</td>
+          <td class="sig-value">-4.1%</td>
+          <td class="sig-detail">Proxy salud retailers APAC → drag Adyen</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-bear">&#9660;</span></td>
+          <td class="sig-name">EUR/USD</td>
+          <td class="sig-value">1.1700</td>
+          <td class="sig-detail">>1.12 = FX headwind para Adyen (reporta en EUR)</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-neutral">&#9679;</span></td>
+          <td class="sig-name">Visa — 30d return</td>
+          <td class="sig-value">-1.9%</td>
+          <td class="sig-detail">Proxy volúmenes cross-border internacionales</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-neutral">&#9679;</span></td>
+          <td class="sig-name">Mastercard — 30d return</td>
+          <td class="sig-value">-2.0%</td>
+          <td class="sig-detail">Proxy volúmenes cross-border</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-bear">&#9660;</span></td>
+          <td class="sig-name">Shopify — 30d return</td>
+          <td class="sig-value">-13.1%</td>
+          <td class="sig-detail">Salud e-commerce + proxy volumen Stripe</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-bull">&#9650;</span></td>
+          <td class="sig-name">Adyen EV/FCF</td>
+          <td class="sig-value">18.3x</td>
+          <td class="sig-detail">FCF yield: 4.06%</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-bull">&#9650;</span></td>
+          <td class="sig-name">Worldline — 30d return</td>
+          <td class="sig-value">-29.7%</td>
+          <td class="sig-detail">Legacy competitor — si cae, ¿flujo hacia Adyen?</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-neutral">&#9679;</span></td>
+          <td class="sig-name">PayPal — 30d return</td>
+          <td class="sig-value">+2.1%</td>
+          <td class="sig-detail">Competitor directo (Braintree enterprise)</td>
+        </tr>
+        <tr>
+          <td><span class="sig-dot sig-neutral">&#9679;</span></td>
+          <td class="sig-name">Adyen — momentum 7d</td>
+          <td class="sig-value">-0.4%</td>
+          <td class="sig-detail">¿El mercado anticipa algo antes del Q1 update?</td>
+        </tr>
+  </tbody>
+</table>
+
+<!-- Comparables -->
+<div class="section-title">Comparables — rendimiento relativo</div>
+<table>
+  <thead>
+    <tr>
+      <th>Empresa</th>
+      <th>Precio</th>
+      <th>30d</th>
+      <th>90d</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+        <tr>
+          <td class="comp-name">Adyen</td>
+          <td>860.0</td>
+          <td class="neg">-8.8%</td>
+          <td class="neg">-39.81%</td>
+        </tr>
+        <tr>
+          <td class="comp-name">PDD (Temu)</td>
+          <td>100.57</td>
+          <td class="neg">-4.1%</td>
+          <td class="neg">-15.3%</td>
+        </tr>
+        <tr>
+          <td class="comp-name">Shopify</td>
+          <td>112.38</td>
+          <td class="neg">-13.1%</td>
+          <td class="neg">-33.08%</td>
+        </tr>
+        <tr>
+          <td class="comp-name">Visa</td>
+          <td>308.29</td>
+          <td class="neg">-1.9%</td>
+          <td class="neg">-9.99%</td>
+        </tr>
+        <tr>
+          <td class="comp-name">Mastercard</td>
+          <td>503.57</td>
+          <td class="neg">-2.0%</td>
+          <td class="neg">-10.92%</td>
+        </tr>
+        <tr>
+          <td class="comp-name">PayPal</td>
+          <td>45.98</td>
+          <td class="pos">+2.1%</td>
+          <td class="neg">-19.5%</td>
+        </tr>
+        <tr>
+          <td class="comp-name">Worldline</td>
+          <td>0.25</td>
+          <td class="neg">-29.7%</td>
+          <td class="neg">-83.3%</td>
+        </tr>
+        <tr>
+          <td class="comp-name">Global Payments</td>
+          <td>65.88</td>
+          <td class="neg">-10.4%</td>
+          <td class="neg">-17.05%</td>
+        </tr>
+  </tbody>
+</table>
+
+<!-- Checklist -->
+<div class="section-title">Checklist pre-Q1 Update (5 mayo)</div>
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; font-size: 0.85rem; line-height: 2;">
+  <div>&#9744; ¿PDD reporta GMV EE.UU. estable o en recuperación?</div>
+  <div>&#9744; ¿Aranceles US-China se relajan o se endurecen? (de minimis status)</div>
+  <div>&#9744; ¿Visa/MA reportan cross-border volumes creciendo?</div>
+  <div>&#9744; ¿Shopify GMV confirma e-com sano? (si sí, problema de Adyen = share loss)</div>
+  <div>&#9744; ¿EUR/USD se mantiene &lt;1.10 o sube? (FX headwind)</div>
+  <div>&#9744; ¿Adyen Q1 net revenue growth &gt;20% cc? → tesis "bache temporal" intacta</div>
+  <div>&#9744; ¿Volumen POS in-store crece &gt;25%? → moat omnicanal confirmado</div>
+  <div>&#9744; ¿Noticias de merchants grandes migrando a Checkout.com?</div>
+</div>
+
+<div class="footer">
+  <div>Datos: Yahoo Finance (yfinance) · No es consejo de inversión</div>
+  <div>Generado: 2026-04-10T18:20:20 · <a href="data/latest.json">JSON</a></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+const prices = [1382.2, 1413.6, 1392.2, 1371.0, 1381.4, 1408.2, 1431.0, 1396.8, 1393.6, 1334.8, 1283.0, 1270.6, 1253.4, 1265.6, 1176.8, 1171.0, 1144.2, 1134.8, 1186.8, 1236.4, 1156.2, 903.3, 897.2, 918.0, 956.9, 984.7, 997.7, 1001.6, 947.3, 932.5, 964.1, 992.3, 994.8, 965.7, 949.1, 957.6, 931.5, 930.4, 942.7, 935.0, 926.5, 917.3, 913.6, 894.2, 911.5, 890.1, 865.6, 863.5, 877.9, 888.5, 906.5, 877.8, 855.5, 864.4, 850.6, 863.7, 845.2, 844.2, 878.1, 860.0];
+const dates = ["2026-01-14", "2026-01-15", "2026-01-16", "2026-01-19", "2026-01-20", "2026-01-21", "2026-01-22", "2026-01-23", "2026-01-26", "2026-01-27", "2026-01-28", "2026-01-29", "2026-01-30", "2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-09", "2026-02-10", "2026-02-11", "2026-02-12", "2026-02-13", "2026-02-16", "2026-02-17", "2026-02-18", "2026-02-19", "2026-02-20", "2026-02-23", "2026-02-24", "2026-02-25", "2026-02-26", "2026-02-27", "2026-03-02", "2026-03-03", "2026-03-04", "2026-03-05", "2026-03-06", "2026-03-09", "2026-03-10", "2026-03-11", "2026-03-12", "2026-03-13", "2026-03-16", "2026-03-17", "2026-03-18", "2026-03-19", "2026-03-20", "2026-03-23", "2026-03-24", "2026-03-25", "2026-03-26", "2026-03-27", "2026-03-30", "2026-03-31", "2026-04-01", "2026-04-02", "2026-04-07", "2026-04-08", "2026-04-09"];
+const ctx = document.getElementById('sparkline').getContext('2d');
+
+const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+gradient.addColorStop(0, 'rgba(50, 102, 173, 0.3)');
+gradient.addColorStop(1, 'rgba(50, 102, 173, 0.0)');
+
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: dates,
+    datasets: [{
+      data: prices,
+      borderColor: '#3266ad',
+      backgroundColor: gradient,
+      fill: true,
+      tension: 0.3,
+      pointRadius: 0,
+      pointHitRadius: 10,
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a1a26',
+        titleColor: '#8a8880',
+        bodyColor: '#e8e6e1',
+        bodyFont: { family: "'JetBrains Mono'" },
+        borderColor: 'rgba(255,255,255,0.1)',
+        borderWidth: 1,
+        callbacks: {
+          label: (ctx) => '€' + ctx.raw.toFixed(2)
+        }
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        ticks: { color: '#5a5850', maxTicksLimit: 8, font: { size: 10, family: "'JetBrains Mono'" } },
+        grid: { color: 'rgba(255,255,255,0.03)' }
+      },
+      y: {
+        display: true,
+        ticks: { color: '#5a5850', callback: v => '€' + v, font: { size: 10, family: "'JetBrains Mono'" } },
+        grid: { color: 'rgba(255,255,255,0.03)' }
+      }
+    }
+  }
+});
+</script>
+
+</body>
+</html>
