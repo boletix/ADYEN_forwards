@@ -1,4 +1,4 @@
-name: Adyen Monitor — Daily Update
+name: Adyen Monitor Daily Update
 
 on:
   schedule:
@@ -26,12 +26,12 @@ jobs:
       - name: Run monitor
         run: python Adyen_monitor.py
 
-      - name: Commit & push
+      - name: Commit and push
         run: |
           git config user.name "Adyen Monitor Bot"
           git config user.email "bot@adyen-monitor.local"
           git add data/ index.html
-          git diff --cached --quiet || git commit -m "📊 Daily update $(date +%Y-%m-%d)"
+          git diff --cached --quiet || git commit -m "Daily update"
           git push
 
   deploy:
@@ -39,7 +39,6 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,52 +50,4 @@ jobs:
         with:
           path: '.'
 
-      - id: deployment
-        uses: actions/deploy-pages@v4
-```
-
-Commit.
-
----
-
-### Paso 3 — Tu repo debería quedar así
-```
-ADYEN_forwards/
-├── .github/
-│   └── workflows/
-│       └── daily-update.yml
-├── .gitignore
-├── Adyen_monitor.py
-└── README.md
-```
-
----
-
-### Paso 4 — Activar GitHub Pages
-
-1. Ve a **Settings** (pestaña arriba a la derecha del repo)
-2. En el menú izquierdo → **Pages**
-3. Donde dice "Source" → selecciona **GitHub Actions**
-4. Guarda
-
----
-
-### Paso 5 — Ejecutar el workflow por primera vez
-
-1. Ve a la pestaña **Actions** (arriba, junto a "Pull requests")
-2. En la barra izquierda verás **"Adyen Monitor — Daily Update"**
-3. Haz clic en ese workflow
-4. Arriba a la derecha aparece el botón **"Run workflow"** → haz clic → **"Run workflow"** (botón verde)
-5. Espera ~2 minutos. Verás un círculo amarillo que se pone verde cuando termina.
-
-Si sale verde, el workflow ha hecho dos cosas:
-- Ha commiteado `data/` e `index.html` al repo automáticamente
-- Ha deployado la web a GitHub Pages
-
----
-
-### Paso 6 — Tu web está live
-
-Entra a:
-```
-https://boletix.github.io/ADYEN_forwards/
+      - uses: actions/deploy-pages@v4
