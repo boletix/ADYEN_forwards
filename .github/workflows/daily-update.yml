@@ -21,16 +21,19 @@ jobs:
           python-version: '3.12'
 
       - name: Install dependencies
-        run: pip install yfinance
+        run: pip install yfinance matplotlib numpy pandas seaborn
 
-      - name: Run monitor
+      - name: Run leading indicators monitor
         run: python Adyen_monitor.py
+
+      - name: Run deep dive analysis
+        run: python Adyen_analysis.py
 
       - name: Commit and push
         run: |
           git config user.name "Adyen Monitor Bot"
           git config user.email "bot@adyen-monitor.local"
-          git add data/ index.html
+          git add data/ index.html analysis.html
           git diff --cached --quiet || git commit -m "Daily update"
           git push
 
